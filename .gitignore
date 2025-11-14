@@ -27,6 +27,46 @@ _testmain.go
 tdata/*
 TXT
 s3-cli
+s3-cli-*
 s3cmd-info
 empty.txt
 .env
+
+# Temporary files
+*.tmp
+tmp/
+test-data/
+
+# Editor swap files
+*.swo
+*.swp
+.idea/
+.vscode/settings.json
+
+# Sensitive configuration files
+.s3cfg*
+*.cfg
+*.conf
+credentials*
+aws-credentials*
+
+# AWS credentials and configuration
+.aws/
+aws.json
+*aws-config*
+*aws-secret*
+
+# GCP credentials and configuration
+.gcp/
+.config/gcloud/
+*gcloud*
+*service-account*.json
+*gcp-credentials*
+*google-credentials*
+application_default_credentials.json
+
+# Azure credentials and configuration
+.azure/
+*azure-credentials*
+*azureauth*
+azureProfile.json

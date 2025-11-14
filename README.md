@@ -4,6 +4,26 @@ Command line utility frontend to the [AWS Go SDK](http://docs.aws.amazon.com/sdk
 for S3.  Inspired by [s3cmd](https://github.com/s3tools/s3cmd) and attempts to be a
 drop-in replacement. 
 
+## 2025-11-14 Build System Improvements
+
+### Makefile Updates
+- Added cross-platform build support for multiple architectures
+- Introduced `BINARY_NAME` variable for easier maintenance
+- Build targets now include:
+  - macOS Intel (darwin-amd64)
+  - macOS Apple Silicon (darwin-arm64)
+  - Linux AMD64 (linux-amd64)
+  - Linux ARM64 (linux-arm64)
+  - Windows Intel 64-bit (windows-amd64)
+  - Windows ARM 64-bit (windows-arm64)
+- Output binary format: `s3-cli-[platform]-[arch]`
+- Updated `clean` target to remove all platform-specific binaries
+
+### .gitignore Updates
+- Added exclusion patterns for all compiled binaries
+- Pattern `s3-cli-*` excludes all platform and architecture-specific builds
+- Ensures compiled artifacts are not committed to version control
+
 ## Features
 
 * Compatible with [s3cmd](https://github.com/s3tools/s3cmd)'s config file
@@ -142,3 +162,59 @@ TODO - for full compatibility (with s3cmd)
 * s3cmd cfdelete cf://DIST_ID
 * s3cmd cfmodify cf://DIST_ID
 * s3cmd cfinvalinfo cf://DIST_ID[/INVAL_ID]
+
+## Security Notes
+
+### Configuration File Security
+- Keep your `.s3cfg` file secure with proper permissions: `chmod 600 ~/.s3cfg`
+- Never commit configuration files containing credentials to version control
+- Use environment variables for CI/CD environments:
+  ```bash
+  export AWS_ACCESS_KEY_ID=your_access_key
+  export AWS_SECRET_ACCESS_KEY=your_secret_key
+  ```
+
+### Best Practices
+- Use IAM roles when running on EC2 instances
+- Rotate access keys regularly  
+- Use least privilege principle for S3 bucket policies
+- Enable CloudTrail logging for audit purposes
+
+### Git Pre-Push Security Checks
+
+To enforce security scans before every git push:
+
+1. Install tools:
+   - gosec: `go install github.com/securego/gosec/v2/cmd/gosec@latest`
+   - Trivy: `sudo apt install trivy` (or use official install script)
+   - Snyk: `curl -sL https://snyk.io/install | bash`
+
+2. Create .git/hooks/pre-push:
+   
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+   
+echo "[security] running checks..."
+   
+go vet ./... || { echo "go vet failed - fix reported issues before pushing"; exit 1; }
+   
+gosec ./... || { echo "gosec failed - review security issues reported above"; exit 1; }
+   
+trivy fs --exit-code 1 --severity HIGH,CRITICAL . || { echo "trivy failed - fix HIGH or CRITICAL vulnerabilities before pushing"; exit 1; }
+   
+snyk test || { echo "snyk test failed - review vulnerabilities reported above"; exit 1; }
+   
+echo "OK"
+```
+
+3. Make executable: chmod +x .git/hooks/pre-push
+4. Optional: run quick checks (go vet, gosec) in a pre-commit hook; keep deeper scans (Trivy, Snyk) in pre-push.
+5. Use VS Code Git: Push to trigger the hook.
+6. Suggested VS Code extensions:
+   - Snyk Vulnerability Scanner
+   - Trivy Vulnerability Scanner
+   - Trunk (aggregated lint/security tooling)
+
+If a scan fails, the push is blocked until issues are resolved.

@@ -66,7 +66,7 @@ func copyToLocal(config *Config, src, dst *FileURI, ensure_directory bool) error
 			}
 			if err := os.MkdirAll(dir, 0755); err != nil {
 				fmt.Println(err)
-				return fmt.Errorf("Error making directory dir=%s error=%v", dir, err)
+				return fmt.Errorf("error making directory dir=%s error=%v", dir, err)
 			}
 		}
 	}
@@ -136,7 +136,7 @@ func copyOnS3(config *Config, src, dst *FileURI) error {
 	}
 
 	if strings.HasSuffix(src.Path, "/") {
-		return fmt.Errorf("Invalid source for bucket to bucket copy path ends in '/'")
+		return fmt.Errorf("invalid source for bucket to bucket copy path ends in '/'")
 	}
 
 	params := &s3.CopyObjectInput{
@@ -166,8 +166,6 @@ func cleanBucketDestPath(src, dst string) *string {
 	if strings.HasSuffix(dst, "/") {
 		dst += filepath.Base(src)
 	}
-	if strings.HasPrefix(dst, "/") {
-		dst = dst[1:]
-	}
+	dst = strings.TrimPrefix(dst, "/")
 	return &dst
 }
