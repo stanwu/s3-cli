@@ -142,3 +142,20 @@ TODO - for full compatibility (with s3cmd)
 * s3cmd cfdelete cf://DIST_ID
 * s3cmd cfmodify cf://DIST_ID
 * s3cmd cfinvalinfo cf://DIST_ID[/INVAL_ID]
+
+## Security Notes
+
+### Configuration File Security
+- Keep your `.s3cfg` file secure with proper permissions: `chmod 600 ~/.s3cfg`
+- Never commit configuration files containing credentials to version control
+- Use environment variables for CI/CD environments:
+  ```bash
+  export AWS_ACCESS_KEY_ID=your_access_key
+  export AWS_SECRET_ACCESS_KEY=your_secret_key
+  ```
+
+### Best Practices
+- Use IAM roles when running on EC2 instances
+- Rotate access keys regularly  
+- Use least privilege principle for S3 bucket policies
+- Enable CloudTrail logging for audit purposes
