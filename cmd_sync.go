@@ -57,14 +57,14 @@ func CmdSync(config *Config, c *cli.Context) error {
 
 	args := c.Args().Slice()
 	if len(args) < 2 {
-		return fmt.Errorf("Not enough arguments")
+		return fmt.Errorf("not enough arguments")
 	}
 
 	dst, args := args[len(args)-1], args[:len(args)-1]
 
 	dst_uri, err := FileURINew(dst)
 	if err != nil {
-		return fmt.Errorf("Invalid destination argument %s", dst)
+		return fmt.Errorf("invalid destination argument %s", dst)
 	}
 	if dst_uri.Scheme == "" {
 		dst_uri.Scheme = "file"
@@ -79,7 +79,7 @@ func CmdSync(config *Config, c *cli.Context) error {
 	for _, path := range args {
 		u, err := FileURINew(path)
 		if err != nil {
-			return fmt.Errorf("Invalid source argument %s", path)
+			return fmt.Errorf("invalid source argument %s", path)
 		}
 		if u.Scheme == "" {
 			u.Scheme = "file"
@@ -98,7 +98,7 @@ func CmdSync(config *Config, c *cli.Context) error {
 		}
 	}
 	if fileCount != 0 && dirCount != 0 {
-		return fmt.Errorf("Can't mix files and directories in sources")
+		return fmt.Errorf("can't mix files and directories in sources")
 	}
 
 	// Handle the inputs
@@ -252,9 +252,9 @@ func CmdSync(config *Config, c *cli.Context) error {
 		for idx := range srcs {
 			src_info, exists := finfo[srcs[idx]]
 			if !exists {
-				return fmt.Errorf("Unable to stat the source file %s", srcs[idx].String())
+				return fmt.Errorf("unable to stat the source file %s", srcs[idx].String())
 			}
-			dst_info, _ := finfo[*dst_list[idx]]
+			dst_info := finfo[*dst_list[idx]]
 			// fmt.Println(*dst_list[idx], dst_info)
 
 			addWork(&srcs[idx], src_info, dst_list[idx], dst_info)
@@ -414,9 +414,7 @@ func amazonEtagHash(path string) (string, error) {
 	const BLOCK_SIZE = 1024 * 1024 * 5    // 5MB
 	const START_BLOCKS = 1024 * 1024 * 16 // 16MB
 
-	if strings.HasPrefix(path, "file://") {
-		path = path[7:]
-	}
+	path = strings.TrimPrefix(path, "file://")
 	fd, err := os.Open(path)
 	if err != nil {
 		return "", err
