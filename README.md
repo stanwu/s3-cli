@@ -4,6 +4,26 @@ Command line utility frontend to the [AWS Go SDK](http://docs.aws.amazon.com/sdk
 for S3.  Inspired by [s3cmd](https://github.com/s3tools/s3cmd) and attempts to be a
 drop-in replacement. 
 
+## 2025-11-14 Build System Improvements
+
+### Makefile Updates
+- Added cross-platform build support for multiple architectures
+- Introduced `BINARY_NAME` variable for easier maintenance
+- Build targets now include:
+  - macOS Intel (darwin-amd64)
+  - macOS Apple Silicon (darwin-arm64)
+  - Linux AMD64 (linux-amd64)
+  - Linux ARM64 (linux-arm64)
+  - Windows Intel 64-bit (windows-amd64)
+  - Windows ARM 64-bit (windows-arm64)
+- Output binary format: `s3-cli-[platform]-[arch]`
+- Updated `clean` target to remove all platform-specific binaries
+
+### .gitignore Updates
+- Added exclusion patterns for all compiled binaries
+- Pattern `s3-cli-*` excludes all platform and architecture-specific builds
+- Ensures compiled artifacts are not committed to version control
+
 ## Features
 
 * Compatible with [s3cmd](https://github.com/s3tools/s3cmd)'s config file
