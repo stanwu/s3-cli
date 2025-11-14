@@ -159,3 +159,42 @@ TODO - for full compatibility (with s3cmd)
 - Rotate access keys regularly  
 - Use least privilege principle for S3 bucket policies
 - Enable CloudTrail logging for audit purposes
+
+### Git Pre-Push Security Checks
+
+To enforce security scans before every git push:
+
+1. Install tools:
+   - gosec: `go install github.com/securego/gosec/v2/cmd/gosec@latest`
+   - Trivy: `sudo apt install trivy` (or use official install script)
+   - Snyk: `curl -sL https://snyk.io/install | bash`
+
+2. Create .git/hooks/pre-push:
+   
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+   
+echo "[security] running checks..."
+   
+go vet ./... || { echo "go vet failed - fix reported issues before pushing"; exit 1; }
+   
+gosec ./... || { echo "gosec failed - review security issues reported above"; exit 1; }
+   
+trivy fs --exit-code 1 --severity HIGH,CRITICAL . || { echo "trivy failed - fix HIGH or CRITICAL vulnerabilities before pushing"; exit 1; }
+   
+snyk test || { echo "snyk test failed - review vulnerabilities reported above"; exit 1; }
+   
+echo "OK"
+```
+
+3. Make executable: chmod +x .git/hooks/pre-push
+4. Optional: run quick checks (go vet, gosec) in a pre-commit hook; keep deeper scans (Trivy, Snyk) in pre-push.
+5. Use VS Code Git: Push to trigger the hook.
+6. Suggested VS Code extensions:
+   - Snyk Vulnerability Scanner
+   - Trivy Vulnerability Scanner
+   - Trunk (aggregated lint/security tooling)
+
+If a scan fails, the push is blocked until issues are resolved.
